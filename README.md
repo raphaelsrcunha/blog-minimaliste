@@ -15,7 +15,7 @@ Avant de démarrer l'application, assurez-vous d'avoir installé les dépendance
 
 1. Clonez ce dépôt:
    ```bash
-   git clone <url-du-dépot>
+   git clone https://github.com/raphaelsrcunha/blog-minimaliste.git
    cd blog-minimaliste
    ```
 
