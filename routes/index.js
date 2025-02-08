@@ -11,7 +11,7 @@ const secretKey = 'mySecretKey';
 //Signup
 router.post('/register', (req, res) => {
     const { username, password, role} = req.body;
-
+    console.log(req.body);
     bcrypt.hash(password, 10, (err, hashedPassword) => {
         if(err) return res.status(500).json({ message: "Error hashing password" });
 
@@ -43,7 +43,7 @@ router.post('/login', (req, res) => {
 
                 if (match) {
                     const token = jwt.sign({ userId: user.id, role: user.role }, secretKey, { expiresIn: '1h' });
-                    res.json({ token });
+                    res.status(201).json({ token, userId: user.id, role: user.role });
                 } else {
                     res.status(401).json({ message: 'Invalid credentials' });
                 }
@@ -205,7 +205,7 @@ router.get('/posts', authenticateJWT, (req, res) => {
             console.error("Erro ao consultar o banco de dados:", err);
             return res.status(500).send("Erro ao consultar o banco de dados.");
         }
-        res.status(200).json(results);
+        res.status(201).json(results);
     });
 });
 
@@ -283,7 +283,6 @@ router.post('/posts/:postId/comments', authenticateJWT, (req, res) => {
 
         res.status(201).json({ message: "Commentaire a crée avec succès!"})
     })
-
 })
 
 router.get('/comments', authenticateJWT, (req, res) => {
@@ -302,6 +301,20 @@ router.get('/comments', authenticateJWT, (req, res) => {
     db.query(sql, params, (err, result) => {
         if (err) return res.status(500).json({ message: 'Erreur serveur.', error: err });
         res.json(result);
+    });
+});
+
+router.get('/posts/:postId/comments', authenticateJWT, (req, res) => {
+    const postId = req.params.postId;
+
+    const sql = 'SELECT * FROM comments WHERE post_id = ?';
+
+    db.query(sql, [postId], (err, result) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+
+        res.status(201).json(result);
     });
 });
 
@@ -338,7 +351,7 @@ router.put('/comments/:commentId', authenticateJWT, (req, res) => {
                 return res.status(404).json({ message: "Commentaire non trouvé!" });
             }
 
-            res.status(200).json({ message: "Commentaire mis à jour avec succès!" });
+            res.status(204).json({ message: "Commentaire mis à jour avec succès!" });
         });
     });
 });
@@ -376,7 +389,7 @@ router.delete('/comments/:commentId', authenticateJWT, (req, res) => {
                 return res.status(404).json({ message: "Commentaire non trouvé!" });
             }
 
-            res.status(200).json({ message: "Commentaire supprimé avec succès!" });
+            res.status(204).json({ message: "Commentaire supprimé avec succès!" });
         });
     });
 });
